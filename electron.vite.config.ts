@@ -57,6 +57,9 @@ const ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL =
   typeof orcaDiagnosticsTokenUrl === 'string' && orcaDiagnosticsTokenUrl.length > 0
     ? JSON.stringify(orcaDiagnosticsTokenUrl)
     : 'null'
+// Why: a packaged build that no release feed will ever serve (fork, local one-off) must not
+// poll upstream's feed and offer to replace itself. Compile-time so it cannot be toggled later.
+const ORCA_UPDATES_DISABLED_LITERAL = process.env.ORCA_UPDATES_DISABLED === '1' ? 'true' : 'false'
 
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
@@ -271,7 +274,8 @@ export const electronViteConfig: UserConfig = {
     define: {
       ORCA_BUILD_IDENTITY: ORCA_BUILD_IDENTITY_LITERAL,
       ORCA_POSTHOG_WRITE_KEY: ORCA_POSTHOG_WRITE_KEY_LITERAL,
-      ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL
+      ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL,
+      ORCA_UPDATES_DISABLED: ORCA_UPDATES_DISABLED_LITERAL
     },
     // Why: @xterm/headless declares "exports": null in package.json, which
     // prevents Vite's default resolver from finding the CJS entry. Point

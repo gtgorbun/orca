@@ -20,3 +20,9 @@ declare const ORCA_POSTHOG_WRITE_KEY: string | null
 // point a packaged build at a staging server without re-running the
 // release pipeline.
 declare const ORCA_DIAGNOSTICS_TOKEN_URL: string | null
+
+// Build-time opt-out for the in-app updater, for packaged builds that are not
+// published to any release feed (a fork or a one-off local package). `true`
+// when `ORCA_UPDATES_DISABLED=1` is set for the build; `false` otherwise, so
+// official builds keep their normal update checks with no env-var fallback.
+declare const ORCA_UPDATES_DISABLED: boolean

@@ -18,6 +18,7 @@ import { registerAutoUpdaterHandlers } from '../updater-events'
 import { getServeUpdateHandoffFailure } from '../serve-update-handoff'
 import { recordUpdaterLifecycle } from '../updater-lifecycle-diagnostics'
 import { AUTO_UPDATE_CHECK_INTERVAL_MS } from './updater-state'
+import { isUpdaterDisabledByBuild } from './updater-build-opt-out'
 import { UpdaterDownloadInstall } from './updater-download-install'
 import type { UpdateInstallMode } from './updater-state'
 
@@ -133,6 +134,11 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
       return
     }
     if (is.dev) {
+      return
+    }
+    // Why: a build compiled with ORCA_UPDATES_DISABLED is served by no feed; skipping here
+    // also skips the nudge and the wake/focus background checks registered below.
+    if (isUpdaterDisabledByBuild()) {
       return
     }
 
