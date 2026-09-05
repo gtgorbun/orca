@@ -38,6 +38,13 @@ several long-stable functions into libc under brand-new symbol versions:
 | `pthread_sigmask` | `GLIBC_2.32` | reset child signal mask |
 | `openpty`         | `GLIBC_2.34` | allocate the pty        |
 | `forkpty`         | `GLIBC_2.34` | fork the shell          |
+| `cfsetispeed`     | `GLIBC_2.42` | set the pty input baud  |
+| `cfsetospeed`     | `GLIBC_2.42` | set the pty output baud |
+
+The last two are a separate, later bump: glibc 2.42 reworked termios baud-rate
+handling and gave the `cfset*speed` functions new symbol versions, so a build
+host on glibc 2.42 or newer (Ubuntu 26.04, Fedora 43) trips the floor gate the
+same way the 2.34 merge did.
 
 Electron itself (glibc 2.25) and the other bundled native modules
 (`sherpa-onnx`, `@parcel/watcher`, both prebuilt on old glibc) stay well under
@@ -47,8 +54,8 @@ the floor, so node-pty was the sole blocker.
 
 **1. Pin the relocated symbols (the fix).**
 [`config/patches/node-pty@1.1.0.patch`](../../config/patches/node-pty@1.1.0.patch)
-adds a `.symver` shim in `src/unix/pty.cc` that binds `openpty`, `forkpty`, and
-`pthread_sigmask` to their pre-merge version node — `GLIBC_2.2.5` on x64,
+adds a `.symver` shim in `src/unix/pty.cc` that binds `openpty`, `forkpty`,
+`pthread_sigmask`, `cfsetispeed`, and `cfsetospeed` to their pre-bump version node — `GLIBC_2.2.5` on x64,
 `GLIBC_2.17` on arm64 (each architecture's baseline glibc). glibc still ships
 those as compatibility aliases, so the reference resolves on both new build hosts
 and old targets.
