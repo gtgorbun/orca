@@ -26,11 +26,11 @@ git checkout dev && git merge main               # bring upstream into dev
 ## Build a package
 
 ```bash
-pnpm build:fork 2                                # -> 1.4.197-gg.2, artifacts in dist/
-sudo dpkg -i dist/orca-ide_1.4.197-gg.2_amd64.deb
+pnpm build:fork 2                                # -> dist/fork/orca-linux-1.4.197-gg.2.AppImage + .deb
+./dist/fork/orca-linux-1.4.197-gg.2.AppImage      # run it in place, or: sudo apt install ./dist/fork/orca-ide_1.4.197-gg.2_amd64.deb
 ```
 
-The `.deb` installer fixes Chromium's SUID sandbox helper itself, which the
+Each build lands under a versioned name in `dist/fork/` and is never overwritten; the script refuses a version that already exists. The AppImage needs no install and no sandbox setup (its launcher passes `--no-sandbox`). The `.deb` installer fixes Chromium's SUID sandbox helper itself, which the
 AppImage cannot do on Ubuntu with restricted user namespaces. The version is
 stamped at build time through `ORCA_LOCAL_BUILD_VERSION`; package.json is never
 edited, so version bumps never conflict on merge. The installed CLI is
