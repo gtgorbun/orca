@@ -33,7 +33,12 @@ sudo dpkg -i dist/orca-ide_1.4.197-gg.2_amd64.deb
 The `.deb` installer fixes Chromium's SUID sandbox helper itself, which the
 AppImage cannot do on Ubuntu with restricted user namespaces. The version is
 stamped at build time through `ORCA_LOCAL_BUILD_VERSION`; package.json is never
-edited, so version bumps never conflict on merge.
+edited, so version bumps never conflict on merge. The installed CLI is
+`orca-ide` (Linux keeps `orca` for GNOME's screen reader).
+
+The RPM target runs last and needs `rpmbuild` (`sudo apt-get install rpm`).
+Without it the build exits non-zero after the `.deb` and AppImage are already
+in `dist/`, so the failure is harmless for a Debian-family host.
 
 ## Fork-only changes
 
