@@ -26,7 +26,7 @@ git checkout dev && git merge main               # bring upstream into dev
 ## Build a package
 
 ```bash
-node config/scripts/build-fork-linux.mjs 2       # -> 1.4.197-gg.2, artifacts in dist/
+pnpm build:fork 2                                # -> 1.4.197-gg.2, artifacts in dist/
 sudo dpkg -i dist/orca-ide_1.4.197-gg.2_amd64.deb
 ```
 
