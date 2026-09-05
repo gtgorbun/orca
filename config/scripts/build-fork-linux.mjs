@@ -81,6 +81,21 @@ if (alreadyBuilt.length > 0) {
   process.exit(2)
 }
 
+// Why: electron-builder rewrites dist/orca-linux.AppImage and dist/linux-unpacked in place, so a
+// copy running from either would be clobbered mid-flight. Copies under dist/fork are safe.
+const running = spawnSync('pgrep', ['-af', 'orca-linux\\.AppImage|dist/linux-unpacked/'], {
+  encoding: 'utf8'
+})
+const unsafeProcesses = (running.stdout ?? '')
+  .split('\n')
+  .filter((line) => line.trim() && !line.includes('dist/fork/') && !line.includes('pgrep'))
+if (unsafeProcesses.length > 0) {
+  console.error(
+    `[fork-build] Orca is running from dist/orca-linux.AppImage or dist/linux-unpacked, which this build overwrites. Close it, or start it from dist/fork first:\n${unsafeProcesses.map((line) => `  ${line}`).join('\n')}`
+  )
+  process.exit(3)
+}
+
 console.log(`[fork-build] version ${version} (base ${baseVersion}), updater disabled`)
 const result = spawnSync('pnpm', ['run', 'build:linux'], {
   cwd: repoRoot,
