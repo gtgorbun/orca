@@ -252,7 +252,7 @@ index 181ccabbbe9c4948a9725fb1db907a68e9de01fc..67f31facf85562b67adbfbd04ce28ddd
  process.send!({ consoleProcessList });
  process.exit(0);
 diff --git a/src/unix/pty.cc b/src/unix/pty.cc
-index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a52c690e0a 100644
+index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..c5911a6ca0a0090d23665bd692828c1c90b6a4e4 100644
 --- a/src/unix/pty.cc
 +++ b/src/unix/pty.cc
 @@ -23,7 +23,9 @@
@@ -265,7 +265,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  #include <thread>
  
  #include <sys/types.h>
-@@ -47,6 +49,25 @@
+@@ -47,6 +49,27 @@
  #include <termios.h>
  #endif
  
@@ -285,13 +285,15 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
 +__asm__(".symver openpty,openpty@" ORCA_GLIBC_COMPAT_VERSION);
 +__asm__(".symver forkpty,forkpty@" ORCA_GLIBC_COMPAT_VERSION);
 +__asm__(".symver pthread_sigmask,pthread_sigmask@" ORCA_GLIBC_COMPAT_VERSION);
++__asm__(".symver cfsetispeed,cfsetispeed@" ORCA_GLIBC_COMPAT_VERSION);
++__asm__(".symver cfsetospeed,cfsetospeed@" ORCA_GLIBC_COMPAT_VERSION);
 +#  endif
 +#endif
 +
  /* Some platforms name VWERASE and VDISCARD differently */
  #if !defined(VWERASE) && defined(VWERSE)
  #define VWERASE	VWERSE
-@@ -228,6 +249,9 @@ Napi::Value PtyGetProc(const Napi::CallbackInfo& info);
+@@ -228,6 +251,9 @@ Napi::Value PtyGetProc(const Napi::CallbackInfo& info);
  static int
  pty_nonblock(int);
  
@@ -301,7 +303,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  #if defined(__APPLE__)
  static char *
  pty_getproc(int);
-@@ -237,13 +261,23 @@ pty_getproc(int, char *);
+@@ -237,13 +263,23 @@ pty_getproc(int, char *);
  #endif
  
  #if defined(__APPLE__) || defined(__OpenBSD__)
@@ -326,7 +328,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  #endif
  
  struct DelBuf {
-@@ -367,14 +401,18 @@ Napi::Value PtyFork(const Napi::CallbackInfo& info) {
+@@ -367,14 +403,18 @@ Napi::Value PtyFork(const Napi::CallbackInfo& info) {
      argv[i + 3] = strdup(arg.c_str());
    }
  
@@ -349,7 +351,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  #else
    int argc = argv_.Length();
    int argl = argc + 2;
-@@ -445,6 +483,9 @@ Napi::Value PtyFork(const Napi::CallbackInfo& info) {
+@@ -445,6 +485,9 @@ Napi::Value PtyFork(const Napi::CallbackInfo& info) {
        if (pty_nonblock(master) == -1) {
          throw Napi::Error::New(napiEnv, "Could not set master fd to nonblocking.");
        }
@@ -359,7 +361,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
    }
  #endif
  
-@@ -586,6 +627,23 @@ pty_nonblock(int fd) {
+@@ -586,6 +629,23 @@ pty_nonblock(int fd) {
    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
  }
  
@@ -383,7 +385,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  /**
   * pty_getproc
   * Taken from tmux.
-@@ -684,15 +742,73 @@ pty_getproc(int fd, char *tty) {
+@@ -684,15 +744,73 @@ pty_getproc(int fd, char *tty) {
  #endif
  
  #if defined(__APPLE__)
@@ -459,7 +461,7 @@ index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..2ae787c5bd4f3eba470584dc658a01a5
  
    for (; count < 3; count++) {
      low_fds[count] = posix_openpt(O_RDWR);
-@@ -706,80 +822,118 @@ pty_posix_spawn(char** argv, char** env,
+@@ -706,80 +824,118 @@ pty_posix_spawn(char** argv, char** env,
                POSIX_SPAWN_SETSID;
    *master = posix_openpt(O_RDWR);
    if (*master == -1) {
